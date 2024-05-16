@@ -9,18 +9,6 @@ const  pool = new Pool ({
     port: process.env.DB_PORT
 }).promise;
 
-// (
-//     async() => {
-//         try {
-//             await pool.connect();
-//             const res = await pool.query('SELECT NOW()');
-//             console.log(res.rows[0]);
-//         } catch (err) {
-//             console.error('Error occured during the connection to the DB', err);
-//         } finally {
-//             await pool.end();
-//         }
-//     }
-// )();
+
 console.log('Created the connection to the database');
 module.exports = { pool };
