@@ -16,5 +16,9 @@
     "express": "^4.19.2",
     "jsdoc": "^4.0.3",
     "pg": "^8.11.5"
-  }
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "devDependencies": {}
 }
