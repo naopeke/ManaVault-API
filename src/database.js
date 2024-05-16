@@ -22,5 +22,5 @@ const  pool = new Pool ({
 //         }
 //     }
 // )();
-
+console.log('Created the connection to the database');
 module.exports = { pool };
