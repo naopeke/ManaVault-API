@@ -6,7 +6,11 @@ npm install
 npm install pg
 ```
 ```
-npm install dotenv
+npm install express-handlebars morgan firebase-admin dotenv cors
+```
+npx nodemon src / package.json npm run dev
+```
+npm i nodemon -D
 ```
 
 PostgresSQL on AWS
