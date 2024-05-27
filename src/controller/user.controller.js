@@ -7,6 +7,9 @@ const { pool } = require('../database');
 
 
 const registerUser = async(req, res, next) => {
+    const { name, email, password } = req.body;
+    console.log(name, email, password);
+
     console.log('register');
 }
 
