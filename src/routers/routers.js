@@ -1,11 +1,8 @@
 const { Router } = require ('express');
 const router = Router();
-const { db } = require ('../firebase');
+const ctrl = require('../controller/initial.controller');
 
-router.get('/', async (req, res) => {
-    const querySnapshot = await db.collection('users').get();
-    console.log(querySnapshot.docs);
-    res.send('API DESPLEGADA');
-});
+
+router.get('/', ctrl.getCollection);
 
 module.exports = router;
