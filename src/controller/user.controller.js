@@ -1,7 +1,9 @@
 const { pool } = require('../database');
-const admin = require('firebase-admin');
+const admin = require('../firebase');
 
 // Firebase
+
+
 const registerUser = async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -43,7 +45,6 @@ const registerUser = async (req, res) => {
         console.error('Error verifying ID token:', error);
         res.status(401).send({ message: 'Authentication failed' });
       }
-
   }
 
   const updateUser = async (req, res) => {
