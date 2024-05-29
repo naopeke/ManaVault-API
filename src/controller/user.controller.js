@@ -2,8 +2,6 @@ const { pool } = require('../database');
 const admin = require('../firebase');
 
 // Firebase
-
-
 const registerUser = async (req, res) => {
     const { email, password } = req.body;
     try {
