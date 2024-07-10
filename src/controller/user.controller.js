@@ -1,15 +1,22 @@
 const { pool } = require('../database');
-const admin = require('../firebase');
+const bcrypt = require('bcrypt');
 
-// Firebase
+
 const registerUser = async (req, res) => {
-    const { email, password } = req.body;
+    const { username, email, password } = req.body;
+
     try {
-      const userRecord = await admin.auth().createUser({
-        email: email,
-        password: password,
-      });
-      console.log('Successfully created new user:', userRecord.uid);
+
+      //hash password
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      const sql = 'INSERT INTO manavault.user (username, email, password) VALUES ($1, $2, $3) RETURNING uid';
+      const values = [username, email, hashedPassword];
+      const result = await pool.query(sql, values);
+     
+      console.log('Successfully created new user ID:', result.rows[0].uid);
+      const userRecord = {id: result.rows[0].uid, username, email};
       res.status(201).send(userRecord);
     } catch (error) {
       console.log('Error creating new user:', error);
@@ -20,9 +27,12 @@ const registerUser = async (req, res) => {
   const getUser = async (req, res) => {
     const { uid } = req.params;
     try {
-      const userRecord = await admin.auth().getUser(uid);
-      console.log('Successfully fetched user data:', userRecord.toJSON());
-      res.status(200).send(userRecord);
+      const sql = 'SELECT * FROM manavault.user WHERE manavault.uid = $1';
+      const values = [uid];
+      const result = await pool.query(sql, values);
+
+      console.log('Successfully fetched user data:', result);
+      res.status(200).send(result);
       
     } catch (error) {
       console.log('Error fetching user data:', error);
@@ -31,16 +41,33 @@ const registerUser = async (req, res) => {
   };
 
   const loginUser = async(req, res) =>{
-    const { idToken } = req.body;    
-    console.log('logged in');
+    const { email, password } = req.body;    
 
     try {
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const uid = decodedToken.uid;
-        console.log('User ID:', uid);
-        res.status(200).send({ uid, message: 'User authenticated successfully' });
-      } catch (error) {
-        console.error('Error verifying ID token:', error);
+        const sql = 'SELECT * FROM manavault.user WHERE email = $1';
+        const values = [email];
+        const result = await pool.query(sql, values);
+
+        if(result.rows.length > 0) {
+           const user = result.rows[0];
+
+           //password
+           const isValidPassword = await bcrypt.compare(password, user.password);
+           if (!isValidPassword){
+            return res.status(401).send({message: 'Authentication failed'});
+           }
+
+           const userRecord = {
+            uid: user.uid,
+            username: user.username,
+            email: user.email
+           }
+          res.status(200).send({ userRecord, message: 'User authenticated successfully' });
+        } else {
+          res.status(401).send({ message: 'Authentication failed' });
+        }
+      } catch (err) {
+        console.error('Error:', err);
         res.status(401).send({ message: 'Authentication failed' });
       }
   }
@@ -71,12 +98,6 @@ const registerUser = async (req, res) => {
       res.status(400).send(error);
     }
   };
-
-
-  
-
-// Propio BBSS
-
 
 
 

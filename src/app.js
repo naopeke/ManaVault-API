@@ -4,7 +4,6 @@ const morgan = require('morgan');
 const routers = require('./routers/routers');
 const generalRouters = require('./routers/general.routers');
 const { errorHandling, handle404 } = require('./error/errorHandling');
-const firebaseAdmin = require('./firebase');
 const app = express();
 
 app.set('port', process.env.PORT || 3000);
