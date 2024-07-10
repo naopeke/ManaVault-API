@@ -78,43 +78,6 @@ const registerUser = async (req, res) => {
 // Propio BBSS
 
 
-// const registerUser = async(req, res, next) => {
-//     const { name, email, password } = req.body;
-//     console.log(name, email, password);
-//     db.collection('users').add({
-//         username,
-//         email,
-//         password
-//     })
-//     res.send('registered');
-// }
-
-// const loginUser = async(req, res, next) => {
-//     console.log('login');
-// }
-
-// const editUser = async(req, res, next) => {
-//     console.log('edited');
-
-//     const doc = await db.collection('users').doc(req.params.id).get();
-
-//     console.log({
-//         id: doc.id,
-//         ...doc.data()
-//     })
-
-// }
-
-// const updateUser = async(req, res, next) => {
-//     console.log('updated');
-
-//     const { id } = req.params;
-//     await db.collection('users').doc(id).update(req.body);
-
-//     console.log({
-//         id: doc.id,
-//         ...doc.data()
-//     })
 
 
 module.exports = {
