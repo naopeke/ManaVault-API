@@ -12,15 +12,25 @@ const  pool = new Pool ({
     // timezone: process.env.TZ
 });
 
-pool.on('connect', () => {
-    console.log('Connected to the database');
-});
+// pool.on('connect', () => {
+//     console.log('Connected to the database');
+// });
 
-pool.on('error', (err) => {
-    console.error('Unexpected error on idle client', err);
-    process.exit(-1);
-});
+// pool.on('error', (err) => {
+//     console.error('Unexpected error on idle client', err);
+//     process.exit(-1);
+// });
 
+const connectToDatabase = async () => {
+    try {
+        await pool.connect();
+        console.log('Connected to the database');
+    } catch (err) {
+        console.error('Unexpected error on idle client', err);
+        process.exit(-1);
+    }
+};
 
-console.log('Created the connection to the database');
+connectToDatabase();
+
 module.exports = { pool };

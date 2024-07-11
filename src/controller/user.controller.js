@@ -1,5 +1,5 @@
 const { pool } = require('../database');
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
 const { User } = require('../models/user')
 
 
@@ -8,10 +8,10 @@ const registerUser = async (req, res) => {
 
     try {
 
-      //hash password
-      const saltRounds = 10;
+      // //hash password
+      // const saltRounds = 10;
       const user = new User(null, email, password, username, null);
-      await user.hashPassword(saltRounds);
+      // await user.hashPassword(saltRounds);
 
       const sql = 'INSERT INTO manavault.users (username, email, password) VALUES ($1, $2, $3) RETURNING userId';
       const values = [user.username, user.email, user.password];
@@ -72,10 +72,10 @@ const registerUser = async (req, res) => {
            const userInstance = new User(user.userId, user.email, user.password, user.username, user.photoURL);
 
            //password
-           const isValidPassword = await userInstance.verifyPassword(password);
-           if (!isValidPassword){
-            return res.status(401).send({message: 'Authentication failed'});
-           }
+          //  const isValidPassword = await userInstance.verifyPassword(password);
+          //  if (!isValidPassword){
+          //   return res.status(401).send({message: 'Authentication failed'});
+          //  }
 
            const userRecord = {
             userId: userInstance.userId,
