@@ -1,5 +1,6 @@
 const { pool } = require('../database');
 const bcrypt = require('bcrypt');
+const { User } = require('../models/user')
 
 
 const registerUser = async (req, res) => {
@@ -9,36 +10,46 @@ const registerUser = async (req, res) => {
 
       //hash password
       const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      const user = new User(null, email, password, username, null);
+      await user.hashPassword(saltRounds);
 
-      const sql = 'INSERT INTO manavault.user (username, email, password) VALUES ($1, $2, $3) RETURNING uid';
-      const values = [username, email, hashedPassword];
+      const sql = 'INSERT INTO manavault.user (username, email, password) VALUES ($1, $2, $3) RETURNING userId';
+      const values = [user.username, user.email, user.password];
       const result = await pool.query(sql, values);
      
-      console.log('Successfully created new user ID:', result.rows[0].uid);
-      const userRecord = {id: result.rows[0].uid, username, email};
-      res.status(201).send(userRecord);
+      user.userId = result.rows[0].userId;
+      console.log('Successfully created new user ID:', user.userId);
+      res.status(201).send(user);
+
     } catch (error) {
       console.log('Error creating new user:', error);
       res.status(400).send(error);
     }
   };
 
+
   const getUser = async (req, res) => {
-    const { uid } = req.params;
+    const { userId } = req.params;
+
     try {
-      const sql = 'SELECT * FROM manavault.user WHERE manavault.uid = $1';
-      const values = [uid];
+      const sql = 'SELECT * FROM manavault.user WHERE manavault.userId = $1';
+      const values = [userId];
       const result = await pool.query(sql, values);
 
-      console.log('Successfully fetched user data:', result);
-      res.status(200).send(result);
+      if (result.rows.length > 0){
+        const user = result.rows[0];
+        console.log('Successfully fetched user data:', result);
+        res.status(200).send(result);
+      } else {
+        res.status(404).send({ message:'User not found' });
+      }
       
     } catch (error) {
       console.log('Error fetching user data:', error);
       res.status(400).send(error);
     }
   };
+
 
   const loginUser = async(req, res) =>{
     const { email, password } = req.body;    
@@ -51,16 +62,18 @@ const registerUser = async (req, res) => {
         if(result.rows.length > 0) {
            const user = result.rows[0];
 
+           const userInstance = new User(user.userId, user.email, user.password, user.username, user.photoURL);
+
            //password
-           const isValidPassword = await bcrypt.compare(password, user.password);
+           const isValidPassword = await userInstance.verifyPassword(password);
            if (!isValidPassword){
             return res.status(401).send({message: 'Authentication failed'});
            }
 
            const userRecord = {
-            uid: user.uid,
-            username: user.username,
-            email: user.email
+            userId: userInstance.userId,
+            username: userInstance.username,
+            email: userInstance.email
            }
           res.status(200).send({ userRecord, message: 'User authenticated successfully' });
         } else {
@@ -73,13 +86,19 @@ const registerUser = async (req, res) => {
   }
 
   const updateUser = async (req, res) => {
-    const { uid } = req.params;
-    const updateData = req.body;
+    const { userId } = req.params;
+    const { email, username, photoURL } = req.body;
 
     try {
-      const userRecord = await admin.auth().updateUser(uid, updateData);
-      console.log('Successfully updated user', userRecord.toJSON());
-      res.status(200).send(userRecord);
+      const sql = 'UPDATE manavault.user SET email = $1, username = $2, photoURL = $3 WHERE userId = $4 RETURNING *';
+      const values = [userId, email, username, photoURL]
+      const result = await pool.query(sql, values);
+
+      if (result.rows.length > 0){
+        const userRecord = result.rows[0];
+        console.log('Successfully updated user', userRecord);
+        res.status(200).send(userRecord);
+      }
 
     } catch (error) {
       console.log('Error updating user:', error);
@@ -87,12 +106,17 @@ const registerUser = async (req, res) => {
     }
   };
 
+
   const deleteUser = async (req, res) => {
-    const { uid } = req.params;
+    const { userId } = req.params;
+
     try {
-      await admin.auth().deleteUser(uid);
-      console.log('Successfully deleted user');
-      res.status(200).send(`Successfully deleted user with UID: ${uid}`);
+      const sql = 'DELETE FROM manavault.user WHERE userId = $1';
+      const values = [userId];
+      await pool.query(sql, values);
+      console.log('Successfully deleted user', values);
+      res.status(200).send(`Successfully deleted user with UID: ${userId}`);
+      
     } catch (error) {
       console.log('Error deleting user:', error);
       res.status(400).send(error);
