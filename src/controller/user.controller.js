@@ -34,7 +34,9 @@ const registerUser = async (req, res) => {
     console.log('Recieved user_id', user_id);
 
     try {
-      const sql = 'SELECT * FROM manavault.users WHERE user_id = $1';
+
+      // doesn't choose password for security
+      const sql = 'SELECT user_id, photoURL, username, email FROM manavault.users WHERE user_id = $1';
       const values = [user_id];
       const result = await pool.query(sql, values);
 
