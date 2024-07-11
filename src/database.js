@@ -10,6 +10,9 @@ const  pool = new Pool ({
     // dialect: 'postgres',
     // dialectModule: pg,
     // timezone: process.env.TZ
+    max: 10, // プールの最大接続数
+    idleTimeoutMillis: 30000, // 非アクティブ接続がクローズされるまでの待機時間
+    connectionTimeoutMillis: 2000, // 新しい接続が確立されるまでのタイムアウト時間
 });
 
 pool.on('connect', () => {
