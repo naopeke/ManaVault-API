@@ -13,7 +13,7 @@ const registerUser = async (req, res) => {
       const user = new User(null, email, password, username, null);
       await user.hashPassword(saltRounds);
 
-      const sql = 'INSERT INTO manavault.user (username, email, password) VALUES ($1, $2, $3) RETURNING userId';
+      const sql = 'INSERT INTO manavault.users (username, email, password) VALUES ($1, $2, $3) RETURNING userId';
       const values = [user.username, user.email, user.password];
       const result = await pool.query(sql, values);
      
@@ -29,17 +29,22 @@ const registerUser = async (req, res) => {
 
 
   const getUser = async (req, res) => {
-    const { userId } = req.params;
+    const { user_id } = req.params;
+
+    console.log('Recieved user_id', user_id);
 
     try {
-      const sql = 'SELECT * FROM manavault.user WHERE manavault.userId = $1';
-      const values = [userId];
+      const sql = 'SELECT * FROM manavault.users WHERE user_id = $1';
+      const values = [user_id];
       const result = await pool.query(sql, values);
+
+      console.log('Excuted SQL', sql, values);
+      console.log('Query result', result.rows);
 
       if (result.rows.length > 0){
         const user = result.rows[0];
-        console.log('Successfully fetched user data:', result);
-        res.status(200).send(result);
+        console.log('Successfully fetched user data:', user);
+        res.status(200).send(user);
       } else {
         res.status(404).send({ message:'User not found' });
       }
