@@ -8,7 +8,7 @@ const  pool = new Pool ({
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
     // dialect: 'postgres',
-    dialectModule: pg,
+    // dialectModule: pg,
     // timezone: process.env.TZ
 });
 
