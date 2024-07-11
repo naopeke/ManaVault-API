@@ -1,8 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const routers = require('./routers/routers');
-const generalRouters = require('./routers/general.routers');
+const testRouters = require('./routers/test.routers');
+const userRouters = require('./routers/user.routers');
+const deckRouters = require('./routers/deck.routers');
 const { errorHandling, handle404 } = require('./error/errorHandling');
 const app = express();
 
@@ -12,8 +13,9 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-app.use(routers);
-app.use(generalRouters);
+app.use(testRouters);
+app.use(userRouters);
+app.use(deckRouters);
 app.use(handle404);
 app.use(errorHandling);
 

@@ -18,6 +18,4 @@ pool.on('error', (err) => {
     process.exit(-1);
 });
 
-
-console.log('Created the connection to the database');
 module.exports = { pool };
