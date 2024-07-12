@@ -1,62 +1,3 @@
-// const { pool } = require('../database');
-// // // const bcrypt = require('bcrypt');
-// const { User } = require('../models/user')
-
-
-// const registerUser = async (req, res) => {
-//     const { username, email, password } = req.body;
-
-//     try {
-
-//       // //hash password
-//       // const saltRounds = 10;
-//       const user = new User(null, email, password, username, null);
-//       // await user.hashPassword(saltRounds);
-
-//       const sql = 'INSERT INTO manavault.users (username, email, password) VALUES ($1, $2, $3) RETURNING userId';
-//       const values = [user.username, user.email, user.password];
-//       const result = await pool.query(sql, values);
-     
-//       user.userId = result.rows[0].userId;
-//       console.log('Successfully created new user ID:', user.userId);
-//       res.status(201).send(user);
-
-//     } catch (error) {
-//       console.log('Error creating new user:', error);
-//       res.status(400).send(error);
-//     }
-//   };
-
-
-//   const getUser = async (req, res) => {
-//     const { user_id } = req.params;
-
-//     console.log('Recieved user_id', user_id);
-
-//     try {
-
-//       // doesn't choose password for security
-//       const sql = 'SELECT user_id, photoURL, username, email FROM manavault.users WHERE user_id = $1';
-//       const values = [user_id];
-//       const result = await pool.query(sql, values);
-
-//       console.log('Excuted SQL', sql, values);
-//       console.log('Query result', result.rows);
-
-//       if (result.rows.length > 0){
-//         const user = result.rows[0];
-//         console.log('Successfully fetched user data:', user);
-//         res.status(200).send(user);
-//       } else {
-//         res.status(404).send({ message:'User not found' });
-//       }
-      
-//     } catch (error) {
-//       console.log('Error fetching user data:', error);
-//       res.status(400).send(error);
-//     }
-//   };
-
 
 //   const loginUser = async(req, res) =>{
 //     const { email, password } = req.body;    
@@ -205,7 +146,45 @@ const registerUser = async (req, res) => {
 
 
 
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const sql = 'SELECT * FROM manavault.users WHERE email = $1';
+    const values = [email];
+    const result = await client.query(sql, values);
+
+    if (result.rows.length > 0) {
+      const user = result.rows[0];
+
+      // パスワードの比較
+      if (password === user.password) {
+        const userInstance = new User(user.userId, user.email, user.password, user.username, user.photoURL);
+
+        const userRecord = {
+          userId: userInstance.userId,
+          username: userInstance.username,
+          email: userInstance.email
+        }
+
+        res.status(200).send({ userRecord, message: 'User authenticated successfully' });
+      } else {
+        // パスワードが一致しない場合
+        res.status(401).send({ message: 'Authentication failed' });
+      }
+    } else {
+      // ユーザーが見つからない場合
+      res.status(401).send({ message: 'Authentication failed' });
+    }
+  } catch (err) {
+    console.error('Error:', err);
+    res.status(401).send({ message: 'Authentication failed' });
+  }
+}
+
+
   module.exports = {
     getUser,
     registerUser,
+    loginUser,
   }
