@@ -1,21 +1,11 @@
- class User {
-    constructor(userId,email,password, username, photoURL
+class User {
+    constructor(user_id,email,password, username, photoURL
     ){
-        this.userId = userId;
+        this.user_id = user_id;
         this.email = email;
         this.password = password;
         this.username = username;
-        this.photoURL = photoURL;
-    }
-
-    // hash password
-    async hashPassword (saltRounds){
-        this.password = await bcrypt.hash(this.password, saltRounds);
-    }
-
-    // verify password
-    async verifyPassword (inputPassword){
-        return await bcrypt.compare(inputPassword, this.password);
+        this.img_uri = img_uri;
     }
 }
 

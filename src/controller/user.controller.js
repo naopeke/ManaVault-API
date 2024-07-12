@@ -43,8 +43,8 @@ const registerUser = async (req, res) => {
     const values = [user.username, user.email, user.password];
     const result = await client.query(sql, values);
     
-    user.userId = result.rows[0].userId;
-    console.log('Successfully created new user ID:', user.userId);
+    user.user_id = result.rows[0].user_id;
+    console.log('Successfully created new user ID:', user.user_id);
     res.status(201).send(user);
 
   } catch (error) {
