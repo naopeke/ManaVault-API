@@ -1,4 +1,4 @@
-export class User {
+ class User {
     constructor(userId,email,password, username, photoURL
     ){
         this.userId = userId;
@@ -18,3 +18,5 @@ export class User {
         return await bcrypt.compare(inputPassword, this.password);
     }
 }
+
+module.exports = { User }
