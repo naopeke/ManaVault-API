@@ -139,61 +139,45 @@ const updateUser = async (req, res) => {
   const { user_id } = req.params;
   const { email, username, img_uri } = req.body;
 
-  // try {
-  //   const sql = 'UPDATE manavault.users SET email = $1, username = $2, img_uri = $3 WHERE user_id = $4 RETURNING *';
-  //   const values = [email, username, img_uri, user_id];
-  //   const result = await client.query(sql, values);
-
-  //   if (result.rows.length > 0){
-  //     const userRecord = result.rows[0];
-  //     console.log('Successfully updated user', userRecord);
-  //     res.status(200).send(userRecord);
-  //   }
-
-  // } catch (error) {
-  //   console.log('Error updating user:', error);
-  //   res.status(400).send(error);
-  // }
-
   try {
-  let sql = 'UPDATE manavault.users SET';
-  let values = [];
-  let index = 1;
+    let sql = 'UPDATE manavault.users SET';
+    let values = [];
+    let index = 1;
 
-  if (email){
-    sql += ` email = $${index},`;
-    values.push(email);
-    index++;
+    if (email){
+      sql += ` email = $${index},`;
+      values.push(email);
+      index++;
+    }
+
+    if (username){
+      sql += ` username = $${index},`;
+      values.push(username);
+      index++;
+    }
+
+    if (img_uri){
+      sql += ` img_uri = $${index},`;
+      values.push(img_uri);
+      index++;
+    }
+
+    sql = sql.slice(0, -1); //delete the last ',' and space
+    sql += ` WHERE user_id = $${index} RETURNING *`;
+    values.push(user_id);
+
+    const result = await client.query(sql, values);
+
+    if (result.rows.length > 0){
+      const userRecord = result.rows[0];
+      console.log('Successfully updated user', userRecord);
+      res.status(200).send(userRecord);
+    }
+
+  } catch (error) {
+    console.log('Error updating user:', error);
+    res.status(400).send(error);
   }
-
-  if (username){
-    sql += ` username = $${index},`;
-    values.push(username);
-    index++;
-  }
-
-  if (img_uri){
-    sql += ` img_uri = $${index},`;
-    values.push(img_uri);
-    index++;
-  }
-
-  sql = sql.slice(0, -1); //delete the last ',' and space
-  sql += ` WHERE user_id = $${index} RETURNING *`;
-  values.push(user_id);
-
-  const result = await client.query(sql, values);
-
-  if (result.rows.length > 0){
-    const userRecord = result.rows[0];
-    console.log('Successfully updated user', userRecord);
-    res.status(200).send(userRecord);
-  }
-
-} catch (error) {
-  console.log('Error updating user:', error);
-  res.status(400).send(error);
-}
 };
 
 
