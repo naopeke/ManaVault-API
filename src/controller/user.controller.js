@@ -1,45 +1,3 @@
-
-
-//   const updateUser = async (req, res) => {
-//     const { userId } = req.params;
-//     const { email, username, photoURL } = req.body;
-
-//     try {
-//       const sql = 'UPDATE manavault.user SET email = $1, username = $2, photoURL = $3 WHERE userId = $4 RETURNING *';
-//       const values = [userId, email, username, photoURL]
-//       const result = await pool.query(sql, values);
-
-//       if (result.rows.length > 0){
-//         const userRecord = result.rows[0];
-//         console.log('Successfully updated user', userRecord);
-//         res.status(200).send(userRecord);
-//       }
-
-//     } catch (error) {
-//       console.log('Error updating user:', error);
-//       res.status(400).send(error);
-//     }
-//   };
-
-
-//   const deleteUser = async (req, res) => {
-//     const { userId } = req.params;
-
-//     try {
-//       const sql = 'DELETE FROM manavault.user WHERE userId = $1';
-//       const values = [userId];
-//       await pool.query(sql, values);
-//       console.log('Successfully deleted user', values);
-//       res.status(200).send(`Successfully deleted user with UID: ${userId}`);
-      
-//     } catch (error) {
-//       console.log('Error deleting user:', error);
-//       res.status(400).send(error);
-//     }
-//   };
-
-
-
 const { client } = require('../database');
 const { User } = require('../models/user')
 
@@ -181,9 +139,28 @@ const updateUser = async (req, res) => {
 };
 
 
+// delete userRecord
+const deleteUser = async (req, res) => {
+  const { user_id } = req.params;
+
+  try {
+    const sql = 'DELETE FROM manavault.users WHERE user_id = $1';
+    const values = [user_id];
+    await client.query(sql, values);
+    console.log('Successfully deleted user', values);
+    res.status(200).send(`Successfully deleted user with user_id: ${user_id}`);
+    
+  } catch (error) {
+    console.log('Error deleting user:', error);
+    res.status(400).send(error);
+  }
+};
+
+
   module.exports = {
     getUser,
     registerUser,
     loginUser,
     updateUser,
+    deleteUser
   }
