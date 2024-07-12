@@ -1,5 +1,5 @@
 class User {
-    constructor(user_id,email,password, username, photoURL
+    constructor(user_id,email,password, username, img_uri
     ){
         this.user_id = user_id;
         this.email = email;
