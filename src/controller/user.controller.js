@@ -3,6 +3,7 @@ const { User } = require('../models/user');
 const jwtMiddleware = require('../middleware/jwtMiddleware');
 const jwt = require('jsonwebtoken'); 
 const verifyToken = require('../middleware/jwtMiddleware');
+const config = require('../middleware/config');
 const secretKey = process.env.JWT_SECRET_KEY
 
 
@@ -57,7 +58,7 @@ const registerUser = async (req, res) => {
       img_uri: user.img_uri,
     }
     
-    const token = jwt.sign(payload, secretKey, {expiresIn:'1h', algorithm:'HS256'});
+    const token = jwt.sign(payload, config.jwt.secret, config.jwt.options);
     console.log(token);
 
     const userRecord = {
@@ -102,7 +103,9 @@ const loginUser = async (req, res) => {
         }
 
         // Create and sign the token
-        const token = jwt.sign(userRecord, secretKey, { expiresIn: '1d', algorithm: 'HS256' });
+        // const token = jwt.sign(userRecord, secretKey, { expiresIn: '1d', algorithm: 'HS256' });
+        const token = jwt.sign(userRecord, config.jwt.secret, config.jwt.options);
+
         console.log('created token', token)
         // Send the token back to the client
         // return res.json({ token });
