@@ -1,5 +1,7 @@
 const { client } = require('../database');
-const { User } = require('../models/user')
+const { User } = require('../models/user');
+const jwtMiddleware = require('../middleware/jwtMiddleware');
+const secretKey = process.env.JWT_SECRET_KEY
 
 
 // get userRecord
@@ -45,7 +47,20 @@ const registerUser = async (req, res) => {
     
     user.user_id = result.rows[0].user_id;
     console.log('Successfully created new user ID:', user.user_id);
-    res.status(201).send(user);
+
+    const token = jwt.sign({user_id}, secretKey, {expiresIn:'1h'});
+    console.log(token);
+
+    const userRecord = {
+      user_id: user.user_id,
+      username: user.username,
+      email: user.email,
+      token: token
+    }
+    console.log(userRecord);
+
+    // res.status(201).send(user);
+    res.status(201).send(userRecord);
 
   } catch (error) {
     console.log('Error creating new user:', error);
@@ -68,13 +83,21 @@ const loginUser = async (req, res) => {
 
       //compare password
       if (password === user.password) {
-        const userInstance = new User(user.userId, user.email, user.password, user.username, user.photoURL);
+        const userInstance = new User(user.user_id, user.email, user.password, user.username, user.img_uri);
+
+        // Create and sign the token
+        const token = jwt.sign({user_id}, secretKey, {expiresIn:'1h'});
+        console.log(token);
 
         const userRecord = {
-          userId: userInstance.userId,
+          user_id: userInstance.user_id,
           username: userInstance.username,
-          email: userInstance.email
+          email: userInstance.email,
+          token: token
         }
+
+        // Send the token back to the client
+        // return res.json({ token });
 
         res.status(200).send({ userRecord, message: 'User authenticated successfully' });
       } else {
