@@ -1,6 +1,7 @@
 const { client } = require('../database');
 const { User } = require('../models/user');
 const jwtMiddleware = require('../middleware/jwtMiddleware');
+const jwt = require('jsonwebtoken'); 
 const secretKey = process.env.JWT_SECRET_KEY
 
 
@@ -41,20 +42,28 @@ const registerUser = async (req, res) => {
 
   try {
     const user = new User(null, email, password, username, null);
-    const sql = 'INSERT INTO manavault.users (username, email, password) VALUES ($1, $2, $3) RETURNING user_id';
-    const values = [user.username, user.email, user.password];
+    const sql = 'INSERT INTO manavault.users ( email, password, username, img_uri) VALUES ($1, $2, $3, $4) RETURNING user_id';
+    const values = [user.username, user.email, user.password, user.img_uri];
     const result = await client.query(sql, values);
     
     user.user_id = result.rows[0].user_id;
     console.log('Successfully created new user ID:', user.user_id);
 
-    const token = jwt.sign({user_id}, secretKey, {expiresIn:'1h'});
+    const payload = {
+      user_id: user.user_id,
+      username: user.username,
+      email: user.email,
+      img_uri: user.img_uri,
+    }
+    
+    const token = jwt.sign(payload, secretKey, {expiresIn:'1h', algorithm:'HS256'});
     console.log(token);
 
     const userRecord = {
       user_id: user.user_id,
       username: user.username,
       email: user.email,
+      img_uri: user.img_uri,
       token: token
     }
     console.log(userRecord);
