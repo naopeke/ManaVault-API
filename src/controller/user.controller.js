@@ -1,5 +1,9 @@
 const { client } = require('../database');
-const { User } = require('../models/user')
+const { User } = require('../models/user');
+const jwtMiddleware = require('../middleware/jwtMiddleware');
+const jwt = require('jsonwebtoken'); 
+const verifyToken = require('../middleware/jwtMiddleware');
+const secretKey = process.env.JWT_SECRET_KEY
 
 
 // get userRecord
@@ -39,13 +43,34 @@ const registerUser = async (req, res) => {
 
   try {
     const user = new User(null, email, password, username, null);
-    const sql = 'INSERT INTO manavault.users (username, email, password) VALUES ($1, $2, $3) RETURNING user_id';
-    const values = [user.username, user.email, user.password];
+    const sql = 'INSERT INTO manavault.users ( email, password, username, img_uri) VALUES ($1, $2, $3, $4) RETURNING user_id';
+    const values = [user.username, user.email, user.password, user.img_uri];
     const result = await client.query(sql, values);
     
     user.user_id = result.rows[0].user_id;
     console.log('Successfully created new user ID:', user.user_id);
-    res.status(201).send(user);
+
+    const payload = {
+      user_id: user.user_id,
+      username: user.username,
+      email: user.email,
+      img_uri: user.img_uri,
+    }
+    
+    const token = jwt.sign(payload, secretKey, {expiresIn:'1h', algorithm:'HS256'});
+    console.log(token);
+
+    const userRecord = {
+      user_id: user.user_id,
+      username: user.username,
+      email: user.email,
+      img_uri: user.img_uri,
+      token: token
+    }
+    console.log(userRecord);
+
+    // res.status(201).send(user);
+    res.status(201).send(userRecord);
 
   } catch (error) {
     console.log('Error creating new user:', error);
@@ -68,15 +93,21 @@ const loginUser = async (req, res) => {
 
       //compare password
       if (password === user.password) {
-        const userInstance = new User(user.userId, user.email, user.password, user.username, user.photoURL);
+        const userInstance = new User(user.user_id, user.email, user.password, user.username, user.img_uri);
 
         const userRecord = {
-          userId: userInstance.userId,
+          user_id: userInstance.user_id,
           username: userInstance.username,
-          email: userInstance.email
+          email: userInstance.email,
         }
 
-        res.status(200).send({ userRecord, message: 'User authenticated successfully' });
+        // Create and sign the token
+        const token = jwt.sign(userRecord, secretKey, { expiresIn: '1d', algorithm: 'HS256' });
+        console.log('created token', token)
+        // Send the token back to the client
+        // return res.json({ token });
+
+        res.status(200).send({ token, userRecord, message: 'User authenticated successfully' });
       } else {
         //when the password doesn't match
         res.status(401).send({ message: 'Authentication failed' });
@@ -91,6 +122,13 @@ const loginUser = async (req, res) => {
   }
 }
 
+
+//verify token protected router
+const protectedRouter = async (req, res) => {
+  const user_id = req.user_id;
+
+  res.json({ user_id, data:'Protected data'});
+}
 
 //edit userRecord
 const updateUser = async (req, res) => {
@@ -161,6 +199,7 @@ const deleteUser = async (req, res) => {
     getUser,
     registerUser,
     loginUser,
+    protectedRouter,
     updateUser,
     deleteUser
   }
