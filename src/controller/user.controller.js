@@ -2,6 +2,7 @@ const { client } = require('../database');
 const { User } = require('../models/user');
 const jwtMiddleware = require('../middleware/jwtMiddleware');
 const jwt = require('jsonwebtoken'); 
+const verifyToken = require('../middleware/jwtMiddleware');
 const secretKey = process.env.JWT_SECRET_KEY
 
 
@@ -94,21 +95,19 @@ const loginUser = async (req, res) => {
       if (password === user.password) {
         const userInstance = new User(user.user_id, user.email, user.password, user.username, user.img_uri);
 
-        // Create and sign the token
-        const token = jwt.sign({user_id}, secretKey, {expiresIn:'1h'});
-        console.log(token);
-
         const userRecord = {
           user_id: userInstance.user_id,
           username: userInstance.username,
           email: userInstance.email,
-          token: token
         }
 
+        // Create and sign the token
+        const token = jwt.sign(userRecord, secretKey, { expiresIn: '1d', algorithm: 'HS256' });
+        console.log('created token', token)
         // Send the token back to the client
         // return res.json({ token });
 
-        res.status(200).send({ userRecord, message: 'User authenticated successfully' });
+        res.status(200).send({ token, userRecord, message: 'User authenticated successfully' });
       } else {
         //when the password doesn't match
         res.status(401).send({ message: 'Authentication failed' });
@@ -123,6 +122,13 @@ const loginUser = async (req, res) => {
   }
 }
 
+
+//verify token protected router
+const protectedRouter = async (req, res) => {
+  const user_id = req.user_id;
+
+  res.json({ user_id, data:'Protected data'});
+}
 
 //edit userRecord
 const updateUser = async (req, res) => {
@@ -193,6 +199,7 @@ const deleteUser = async (req, res) => {
     getUser,
     registerUser,
     loginUser,
+    protectedRouter,
     updateUser,
     deleteUser
   }
