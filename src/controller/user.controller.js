@@ -4,7 +4,7 @@ const jwtMiddleware = require('../middleware/jwtMiddleware');
 const jwt = require('jsonwebtoken'); 
 const verifyToken = require('../middleware/jwtMiddleware');
 const config = require('../middleware/config');
-const secretKey = process.env.JWT_SECRET_KEY
+// const secretKey = process.env.JWT_SECRET_KEY
 
 
 // get userRecord
